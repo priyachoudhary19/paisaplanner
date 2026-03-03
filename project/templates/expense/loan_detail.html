@@ -1,0 +1,25 @@
+{% extends 'expense/base.html' %}
+{% block title %}Loan Detail | AAExpense{% endblock %}
+{% block content %}
+<section class="stats-grid short">
+    <article><h3>{{ loan.counterparty }}</h3><p>{{ loan.get_loan_type_display }}</p></article>
+    <article><h3>Payable</h3><p>INR {{ loan.total_payable }}</p></article>
+    <article><h3>Remaining</h3><p>INR {{ loan.remaining_amount }}</p></article>
+</section>
+
+<section class="form-card">
+    <h2>Add EMI/Payment</h2>
+    <form method="post" class="simple-form">{% csrf_token %}{{ payment_form.as_p }}<button class="btn" type="submit">Add</button></form>
+</section>
+
+<section class="table-wrap">
+    <table>
+        <thead><tr><th>Date</th><th>Amount</th><th>Note</th><th>Action</th></tr></thead>
+        <tbody>
+            {% for payment in payments %}
+            <tr><td>{{ payment.paid_on }}</td><td>{{ payment.amount }}</td><td>{{ payment.notes }}</td><td><a href="{% url 'loan_payment_delete' payment.pk %}">Delete</a></td></tr>
+            {% empty %}<tr><td colspan="4">No payments.</td></tr>{% endfor %}
+        </tbody>
+    </table>
+</section>
+{% endblock %}

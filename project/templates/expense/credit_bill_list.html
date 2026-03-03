@@ -1,0 +1,19 @@
+{% extends 'expense/base.html' %}
+{% block title %}Credit Bills | AAExpense{% endblock %}
+{% block content %}
+<section class="panel-headline">
+    <h1>Credit Card Bills</h1>
+    <a class="btn" href="{% url 'credit_bill_create' %}">Add Bill Payment</a>
+</section>
+<section class="summary-row"><p><strong>Total Paid:</strong> INR {{ total_paid }}</p></section>
+<section class="table-wrap">
+    <table>
+        <thead><tr><th>Date</th><th>Amount</th><th>Note</th><th>Action</th></tr></thead>
+        <tbody>
+            {% for bill in payments %}
+            <tr><td>{{ bill.paid_on }}</td><td>{{ bill.amount }}</td><td>{{ bill.notes }}</td><td><a href="{% url 'credit_bill_delete' bill.pk %}">Delete</a></td></tr>
+            {% empty %}<tr><td colspan="4">No bill payments.</td></tr>{% endfor %}
+        </tbody>
+    </table>
+</section>
+{% endblock %}

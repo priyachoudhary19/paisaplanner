@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}PaisaPlanner{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700&family=Sora:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'expense/style.css' %}">
+</head>
+<body>
+    <header class="topbar">
+        <a class="logo" href="{% url 'dashboard' %}"><i class="fa-solid fa-wallet"></i> PaisaPlanner</a>
+        {% if user.is_authenticated %}
+        <nav class="nav-links">
+            <a href="{% url 'dashboard' %}">Home</a>
+            <a href="{% url 'expense_create_period' 'daily' %}">Add Daily</a>
+            <a href="{% url 'expense_create_period' 'weekly' %}">Add Weekly</a>
+            <a href="{% url 'expense_create_period' 'monthly' %}">Add Monthly</a>
+            <a href="{% url 'expense_create_period' 'yearly' %}">Add Yearly</a>
+            <a href="{% url 'loan_list' %}">Loans</a>
+            <a href="{% url 'reports' %}">Reports</a>
+            <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="logout" type="submit">Logout</button></form>
+        </nav>
+        {% else %}
+        <nav class="nav-links">
+            <a href="{% url 'login' %}">Login</a>
+            <a href="{% url 'signup' %}">Register</a>
+        </nav>
+        {% endif %}
+    </header>
+
+    <main class="container">
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>

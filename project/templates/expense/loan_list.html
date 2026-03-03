@@ -1,0 +1,21 @@
+{% extends 'expense/base.html' %}
+{% block title %}Loans | AAExpense{% endblock %}
+{% block content %}
+<section class="panel-headline">
+    <h1>Loans</h1>
+    <a class="btn" href="{% url 'loan_create' %}">Add Loan</a>
+</section>
+<section class="table-wrap">
+    <table>
+        <thead><tr><th>Name</th><th>Type</th><th>Principal</th><th>Interest</th><th>EMI</th><th>Remaining</th><th>Actions</th></tr></thead>
+        <tbody>
+            {% for loan in loans %}
+            <tr>
+                <td>{{ loan.counterparty }}</td><td>{{ loan.get_loan_type_display }}</td><td>{{ loan.principal_amount }}</td><td>{{ loan.annual_interest_rate }}%</td><td>{{ loan.emi_amount }}</td><td>{{ loan.remaining_amount }}</td>
+                <td><a href="{% url 'loan_detail' loan.pk %}">View</a> <a href="{% url 'loan_update' loan.pk %}">Edit</a> <a href="{% url 'loan_delete' loan.pk %}">Delete</a></td>
+            </tr>
+            {% empty %}<tr><td colspan="7">No loans.</td></tr>{% endfor %}
+        </tbody>
+    </table>
+</section>
+{% endblock %}

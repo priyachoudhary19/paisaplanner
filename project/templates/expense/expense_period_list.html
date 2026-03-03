@@ -1,0 +1,37 @@
+{% extends 'expense/base.html' %}
+{% block title %}{{ period_label }} Expenses | AAExpense{% endblock %}
+{% block content %}
+<section class="panel-headline">
+    <h1>{{ period_label }} Expenses</h1>
+    <div>
+        <a class="btn" href="{% url 'expense_create_period' period %}">Add {{ period_label }}</a>
+    </div>
+</section>
+
+<section class="summary-row">
+    <p><strong>Range:</strong> {{ start }} to {{ end }}</p>
+    <p><strong>Total:</strong> INR {{ total }}</p>
+</section>
+
+<section class="table-wrap">
+    <table>
+        <thead>
+            <tr><th>Date</th><th>Title</th><th>Category</th><th>Payment</th><th>Amount</th><th>Actions</th></tr>
+        </thead>
+        <tbody>
+            {% for expense in expenses %}
+            <tr>
+                <td>{{ expense.expense_date }}</td>
+                <td>{{ expense.title }}</td>
+                <td>{{ expense.get_category_display }}</td>
+                <td>{{ expense.get_payment_method_display }}</td>
+                <td>INR {{ expense.amount }}</td>
+                <td><a href="{% url 'expense_update' expense.pk %}">Edit</a> <a href="{% url 'expense_delete' expense.pk %}">Delete</a></td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6">No expenses in this period.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+{% endblock %}

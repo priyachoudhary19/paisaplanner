@@ -1,0 +1,55 @@
+{% extends 'expense/base.html' %}
+{% block title %}Reports | AAExpense{% endblock %}
+{% block content %}
+<section class="panel-headline">
+    <h1>Complete Expense Report</h1>
+    <a class="btn" href="{% url 'export_pdf' %}"><i class="fa-solid fa-file-pdf"></i> Export PDF</a>
+</section>
+
+<section class="summary-row">
+    <p><strong>Total Expense:</strong> INR {{ total }}</p>
+</section>
+
+<section class="chart-card">
+    <h2>Full Expense Graph</h2>
+    <div class="chart-list">
+        {% for item in chart_data %}
+            <div class="chart-row">
+                <div class="chart-meta"><span>{{ item.label }}</span><strong>INR {{ item.total }}</strong></div>
+                <div class="bar-track"><div class="bar-fill teal" style="width: {{ item.width }}%;"></div></div>
+            </div>
+        {% empty %}
+            <p>No expense data available.</p>
+        {% endfor %}
+    </div>
+</section>
+
+<section class="charts-grid">
+    <article class="chart-card">
+        <h3>Payment Method Split</h3>
+        <div class="chart-list">
+            {% for item in payment_chart_data %}
+                <div class="chart-row">
+                    <div class="chart-meta"><span>{{ item.label }}</span><strong>{{ item.share }}%</strong></div>
+                    <div class="bar-track"><div class="bar-fill blue" style="width: {{ item.width }}%;"></div></div>
+                </div>
+            {% empty %}
+                <p>No payment data available.</p>
+            {% endfor %}
+        </div>
+    </article>
+    <article class="chart-card">
+        <h3>Category Breakdown</h3>
+        <div class="chart-list">
+            {% for item in category_chart_data %}
+                <div class="chart-row">
+                    <div class="chart-meta"><span>{{ item.label }}</span><strong>INR {{ item.total }}</strong></div>
+                    <div class="bar-track"><div class="bar-fill violet" style="width: {{ item.width }}%;"></div></div>
+                </div>
+            {% empty %}
+                <p>No category data available.</p>
+            {% endfor %}
+        </div>
+    </article>
+</section>
+{% endblock %}

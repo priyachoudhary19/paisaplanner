@@ -1,0 +1,8 @@
+{% extends 'expense/base.html' %}
+{% block title %}Login | AAExpense{% endblock %}
+{% block content %}
+<section class="form-card narrow">
+    <h1>Login</h1>
+    <form method="post" class="simple-form">{% csrf_token %}{{ form.as_p }}<button class="btn" type="submit">Login</button></form>
+</section>
+{% endblock %}

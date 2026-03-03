@@ -1,0 +1,9 @@
+{% extends 'expense/base.html' %}
+{% block title %}Confirm Delete | AAExpense{% endblock %}
+{% block content %}
+<section class="form-card narrow">
+    <h1>{{ title }}</h1>
+    <p>Delete this item?</p>
+    <form method="post">{% csrf_token %}<button class="btn danger" type="submit">Delete</button></form>
+</section>
+{% endblock %}

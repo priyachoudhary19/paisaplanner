@@ -1,0 +1,12 @@
+{% extends 'expense/base.html' %}
+{% block title %}{{ title }} | AAExpense{% endblock %}
+{% block content %}
+<section class="form-card">
+    <h1>{{ title }}</h1>
+    <form method="post" class="simple-form">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button class="btn" type="submit">Save</button>
+    </form>
+</section>
+{% endblock %}

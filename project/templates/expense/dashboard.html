@@ -1,0 +1,74 @@
+{% extends 'expense/base.html' %}
+{% block title %}Dashboard | AAExpense{% endblock %}
+{% block content %}
+<section class="hero">
+    <div>
+        <h1>Expense Manager</h1>
+        <p>Simple tracking across daily, weekly, monthly, and yearly spending.</p>
+    </div>
+    <img src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=900&q=80" alt="Finance">
+</section>
+
+<section class="stats-grid">
+    <article><i class="fa-solid fa-calendar-day"></i><h3>Daily</h3><p>INR {{ total_daily }}</p></article>
+    <article><i class="fa-solid fa-calendar-week"></i><h3>Weekly</h3><p>INR {{ total_weekly }}</p></article>
+    <article><i class="fa-solid fa-calendar"></i><h3>Monthly</h3><p>INR {{ total_monthly }}</p></article>
+    <article><i class="fa-solid fa-chart-line"></i><h3>Yearly</h3><p>INR {{ total_yearly }}</p></article>
+</section>
+
+<section class="stats-grid short">
+    <article><i class="fa-solid fa-money-bill-transfer"></i><h3>Loan Remaining</h3><p>INR {{ loan_remaining_total }}</p></article>
+    <article><i class="fa-solid fa-credit-card"></i><h3>Credit Outstanding</h3><p>INR {{ credit_outstanding }}</p></article>
+    <article><i class="fa-solid fa-wand-magic-sparkles"></i><h3>Forecast</h3><p>INR {{ predicted_next_month }} / month</p><small>Year estimate: INR {{ predicted_next_year }}</small></article>
+</section>
+
+<section class="quick-links">
+    <a href="{% url 'expense_period_list' 'daily' %}">View Daily</a>
+    <a href="{% url 'expense_period_list' 'weekly' %}">View Weekly</a>
+    <a href="{% url 'expense_period_list' 'monthly' %}">View Monthly</a>
+    <a href="{% url 'expense_period_list' 'yearly' %}">View Yearly</a>
+    <a href="{% url 'credit_bill_list' %}">Credit Bills</a>
+</section>
+
+<section class="charts-grid">
+    <article class="chart-card">
+        <h3>Monthly Trend</h3>
+        <div class="chart-list">
+            {% for item in monthly_chart_data %}
+                <div class="chart-row">
+                    <div class="chart-meta"><span>{{ item.label }}</span><strong>INR {{ item.total }}</strong></div>
+                    <div class="bar-track"><div class="bar-fill teal" style="width: {{ item.width }}%;"></div></div>
+                </div>
+            {% empty %}
+                <p>No data yet.</p>
+            {% endfor %}
+        </div>
+    </article>
+    <article class="chart-card">
+        <h3>Payment Mix</h3>
+        <div class="chart-list">
+            {% for item in payment_chart_data %}
+                <div class="chart-row">
+                    <div class="chart-meta"><span>{{ item.label }}</span><strong>{{ item.share }}%</strong></div>
+                    <div class="bar-track"><div class="bar-fill blue" style="width: {{ item.width }}%;"></div></div>
+                </div>
+            {% empty %}
+                <p>No data yet.</p>
+            {% endfor %}
+        </div>
+    </article>
+    <article class="chart-card">
+        <h3>Top Categories</h3>
+        <div class="chart-list">
+            {% for item in category_chart_data %}
+                <div class="chart-row">
+                    <div class="chart-meta"><span>{{ item.label }}</span><strong>INR {{ item.total }}</strong></div>
+                    <div class="bar-track"><div class="bar-fill violet" style="width: {{ item.width }}%;"></div></div>
+                </div>
+            {% empty %}
+                <p>No data yet.</p>
+            {% endfor %}
+        </div>
+    </article>
+</section>
+{% endblock %}
