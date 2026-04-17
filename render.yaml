@@ -3,6 +3,7 @@ services:
     name: aaexpense
     env: python
     branch: main
+    rootDirectory: project
     buildCommand: bash build.sh
     startCommand: gunicorn project.wsgi:application
     pythonVersion: "3.13"
