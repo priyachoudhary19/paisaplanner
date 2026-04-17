@@ -337,6 +337,53 @@ def expense_create(request):
     return render(request, "expense/form.html", {"form": form, "title": "Add Expense"})
 
 
+def _month_weeks(year, month):
+    """Return list of (week_num, start_date, end_date) for 4 weeks in a month."""
+    first_day = date(year, month, 1)
+    last_day = date(year, month, calendar.monthrange(year, month)[1])
+    weeks = []
+    week_num = 1
+    current = first_day
+    while current <= last_day and week_num <= 4:
+        week_end = min(current + timedelta(days=6), last_day)
+        weeks.append((week_num, current, week_end))
+        current = week_end + timedelta(days=1)
+        week_num += 1
+    return weeks
+
+
+def _get_week_navigation(year, month, selected_week):
+    """Generate previous and next week navigation URLs."""
+    if selected_week > 1:
+        prev_week = selected_week - 1
+        prev_month = month
+        prev_year = year
+    else:
+        prev_week = 4
+        prev_month = month - 1
+        prev_year = year
+        if prev_month < 1:
+            prev_month = 12
+            prev_year = year - 1
+
+    if selected_week < 4:
+        next_week = selected_week + 1
+        next_month = month
+        next_year = year
+    else:
+        next_week = 1
+        next_month = month + 1
+        next_year = year
+        if next_month > 12:
+            next_month = 1
+            next_year = year + 1
+
+    return {
+        "prev": {"year": prev_year, "month": prev_month, "week": prev_week},
+        "next": {"year": next_year, "month": next_month, "week": next_week},
+    }
+
+
 @login_required
 def expense_period_list(request, period):
     start, end = _period_bounds(period)
@@ -348,11 +395,11 @@ def expense_period_list(request, period):
     current_year = current_date.year
     year_options = list(range(2020, current_year + 2))
     month_options = [(i, calendar.month_name[i]) for i in range(1, 13)]
-    week_options = list(range(1, 54))
+    week_options = list(range(1, 5))  # 4 weeks per month
 
     selected_year = start.year
     selected_month = start.month
-    selected_week = start.isocalendar()[1]
+    selected_week = 1
     selected_day = start
 
     if period == "daily":
@@ -366,19 +413,27 @@ def expense_period_list(request, period):
                 return HttpResponseForbidden("Invalid date selection.")
     elif period == "weekly":
         year_str = request.GET.get("year")
+        month_str = request.GET.get("month")
         week_str = request.GET.get("week")
-        if year_str and week_str:
+        if year_str and month_str and week_str:
             try:
                 selected_year = int(year_str)
+                selected_month = int(month_str)
                 selected_week = int(week_str)
-                start = date.fromisocalendar(selected_year, selected_week, 1)
-                end = start + timedelta(days=6)
-                period_label = f"Week {selected_week}, {selected_year}"
+                weeks = _month_weeks(selected_year, selected_month)
+                if 1 <= selected_week <= len(weeks):
+                    start, end = weeks[selected_week - 1][1], weeks[selected_week - 1][2]
+                    period_label = f"Week {selected_week} - {start.strftime('%d %b')} to {end.strftime('%d %b %Y')}"
+                else:
+                    return HttpResponseForbidden("Invalid week selection.")
             except ValueError:
                 return HttpResponseForbidden("Invalid week selection.")
         else:
-            selected_year = start.isocalendar()[0]
-            selected_week = start.isocalendar()[1]
+            selected_week = 1
+            weeks = _month_weeks(selected_year, selected_month)
+            if weeks:
+                start, end = weeks[0][1], weeks[0][2]
+                period_label = f"Week 1 - {start.strftime('%d %b')} to {end.strftime('%d %b %Y')}"
     elif period == "monthly":
         year_str = request.GET.get("year")
         month_str = request.GET.get("month")
@@ -405,6 +460,11 @@ def expense_period_list(request, period):
 
     expenses = Expense.objects.filter(user=request.user, expense_date__range=(start, end))
     total = expenses.aggregate(total=Sum("amount"))["total"] or Decimal("0.00")
+
+    # Generate month weeks and navigation for weekly view
+    month_weeks = _month_weeks(selected_year, selected_month)
+    week_navigation = _get_week_navigation(selected_year, selected_month, selected_week)
+
     return render(
         request,
         "expense/expense_period_list.html",
@@ -422,6 +482,8 @@ def expense_period_list(request, period):
             "selected_month": selected_month,
             "selected_week": selected_week,
             "selected_day": selected_day,
+            "month_weeks": month_weeks,
+            "week_navigation": week_navigation,
         },
     )
 

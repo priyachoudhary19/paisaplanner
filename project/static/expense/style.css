@@ -632,3 +632,93 @@ textarea.form-control {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
+
+/* Week Selector Styles */
+.week-selector-table {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    padding: 0.5rem 0;
+}
+
+.week-table {
+    border-collapse: separate;
+    border-spacing: 12px 0;
+    margin: 0 0.5rem;
+}
+.week-table td {
+    padding: 0;
+    border: none;
+    background: none;
+}
+
+.week-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0.75rem 1.25rem;
+    border-radius: var(--radius-sm);
+    background: var(--rose-50);
+    border: 1.5px solid var(--line);
+    transition: all 0.2s ease;
+    min-width: 100px;
+    min-height: 54px;
+    font-size: 1rem;
+    box-shadow: 0 2px 8px rgba(159, 95, 121, 0.06);
+    margin: 0 auto;
+}
+.week-btn:hover {
+    background: var(--rose-100);
+    border-color: var(--rose-300);
+    transform: translateY(-2px) scale(1.03);
+}
+.week-btn.active {
+    background: linear-gradient(135deg, #bf7d99, #9f5f79);
+    border-color: var(--rose-500);
+    color: var(--white);
+    box-shadow: 0 4px 12px rgba(159, 95, 121, 0.13);
+}
+.week-num {
+    font-weight: 700;
+    font-size: 1.05rem;
+    margin-bottom: 0.18rem;
+}
+.week-dates {
+    font-size: 0.85rem;
+    opacity: 0.85;
+}
+.week-btn.active .week-dates {
+    opacity: 1;
+}
+.week-nav-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--rose-100);
+    color: var(--rose-500);
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    font-size: 1.3rem;
+    border: none;
+    box-shadow: 0 2px 8px rgba(159, 95, 121, 0.08);
+}
+.week-nav-btn:hover {
+    background: var(--rose-300);
+    color: var(--white);
+    transform: scale(1.08);
+}
+
+@media (max-width: 900px) {
+    .week-table td {
+        padding: 0 2px;
+    }
+    .week-btn {
+        min-width: 70px;
+        padding: 0.5rem 0.7rem;
+        font-size: 0.95rem;
+    }
+}
