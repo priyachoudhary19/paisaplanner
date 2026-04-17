@@ -322,6 +322,14 @@ def expense_create(request):
     form = ExpenseForm(request.POST or None, initial={"expense_date": timezone.localdate()})
     if request.method == "POST" and form.is_valid():
         expense = form.save(commit=False)
+        if expense.payment_method == Expense.PAYMENT_CREDIT_CARD_BILL:
+            CreditCardBillPayment.objects.create(
+                user=request.user,
+                amount=expense.amount,
+                paid_on=expense.expense_date,
+                notes=expense.notes,
+            )
+            return redirect("credit_bill_list")
         expense.user = request.user
         expense.save()
         return redirect("expense_period_list", period="monthly")
@@ -363,6 +371,14 @@ def expense_create_period(request, period):
     form = ExpenseForm(request.POST or None, initial={"expense_date": initial_date})
     if request.method == "POST" and form.is_valid():
         expense = form.save(commit=False)
+        if expense.payment_method == Expense.PAYMENT_CREDIT_CARD_BILL:
+            CreditCardBillPayment.objects.create(
+                user=request.user,
+                amount=expense.amount,
+                paid_on=expense.expense_date,
+                notes=expense.notes,
+            )
+            return redirect("credit_bill_list")
         expense.user = request.user
         expense.save()
         return redirect("expense_period_list", period=period)

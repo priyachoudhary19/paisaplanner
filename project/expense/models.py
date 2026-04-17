@@ -10,10 +10,12 @@ class Expense(models.Model):
     PAYMENT_CASH = "cash"
     PAYMENT_UPI = "upi"
     PAYMENT_CREDIT_CARD = "credit_card"
+    PAYMENT_CREDIT_CARD_BILL = "credit_card_bill"
     PAYMENT_CHOICES = [
         (PAYMENT_CASH, "Cash"),
         (PAYMENT_UPI, "UPI"),
         (PAYMENT_CREDIT_CARD, "Credit Card"),
+        (PAYMENT_CREDIT_CARD_BILL, "Credit Card Bill Payment"),
     ]
     PAYMENT_CHOICES_DICT = dict(PAYMENT_CHOICES)
     CATEGORY_ENTERTAINMENT = "entertainment"
