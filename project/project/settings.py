@@ -28,8 +28,11 @@ DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 
 ALLOWED_HOSTS = [host.strip() for host in os.getenv("ALLOWED_HOSTS", "127.0.0.1,localhost,paisaplanner-nivz.onrender.com").split(",") if host.strip()]
 
-csrf_origins = os.getenv("CSRF_TRUSTED_ORIGINS", "https://paisaplanner-nivz.onrender.com")
+csrf_origins = os.getenv("CSRF_TRUSTED_ORIGINS", "https://paisaplanner-nivz.onrender.com,https://www.paisaplanner-nivz.onrender.com")
 CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in csrf_origins.split(",") if origin.strip()]
+
+CSRF_COOKIE_HTTPONLY = False
+CSRF_COOKIE_SAMESITE = 'Lax'
 
 
 # Application definition
@@ -132,6 +135,7 @@ SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 if not DEBUG:
     SESSION_COOKIE_SECURE = True
+    SESSION_COOKIE_SAMESITE = 'Lax'
     CSRF_COOKIE_SECURE = True
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
