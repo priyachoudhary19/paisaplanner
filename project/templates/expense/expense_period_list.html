@@ -19,11 +19,81 @@
         <p><a class="text-link" href="{% url 'expense_create_period' period %}">Create {{ period }} expense</a></p>
     </article>
 </section>
-{% if period == 'monthly' %}
 <section class="content-card mt-4">
     <div class="section-heading">
         <div>
-            <p class="eyebrow-text">Custom month view</p>
+            <p class="eyebrow-text">View period</p>
+            <h3>Select daily, weekly, monthly or yearly</h3>
+        </div>
+    </div>
+    <div class="row gx-2 gy-3">
+        <div class="col-auto">
+            <a class="btn btn-soft-rose" href="{% url 'expense_period_list' 'daily' %}">Daily</a>
+        </div>
+        <div class="col-auto">
+            <a class="btn btn-soft-rose" href="{% url 'expense_period_list' 'weekly' %}">Weekly</a>
+        </div>
+        <div class="col-auto">
+            <a class="btn btn-soft-rose" href="{% url 'expense_period_list' 'monthly' %}">Monthly</a>
+        </div>
+        <div class="col-auto">
+            <a class="btn btn-soft-rose" href="{% url 'expense_period_list' 'yearly' %}">Yearly</a>
+        </div>
+    </div>
+</section>
+{% if period == 'daily' %}
+<section class="content-card mt-4">
+    <div class="section-heading">
+        <div>
+            <p class="eyebrow-text">Choose a day</p>
+            <h3>View a single day</h3>
+        </div>
+    </div>
+    <form method="get" class="row g-3 align-items-end">
+        <div class="col-auto">
+            <label for="date" class="form-label">Date</label>
+            <input type="date" id="date" name="date" class="form-control" value="{{ selected_day }}">
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary">Show day</button>
+        </div>
+    </form>
+</section>
+{% elif period == 'weekly' %}
+<section class="content-card mt-4">
+    <div class="section-heading">
+        <div>
+            <p class="eyebrow-text">Choose a week</p>
+            <h3>View a full week</h3>
+        </div>
+    </div>
+    <form method="get" class="row g-3 align-items-end">
+        <div class="col-auto">
+            <label for="year" class="form-label">Year</label>
+            <select id="year" name="year" class="form-select">
+                {% for y in year_options %}
+                    <option value="{{ y }}" {% if y == selected_year %}selected{% endif %}>{{ y }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-auto">
+            <label for="week" class="form-label">Week</label>
+            <select id="week" name="week" class="form-select">
+                {% for w in week_options %}
+                    <option value="{{ w }}" {% if w == selected_week %}selected{% endif %}>Week {{ w }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary">Show week</button>
+        </div>
+    </form>
+</section>
+{% elif period == 'monthly' %}
+<section class="content-card mt-4">
+    <div class="section-heading">
+        <div>
+            <p class="eyebrow-text">Choose a month</p>
             <h3>View any month</h3>
         </div>
     </div>
@@ -46,6 +116,28 @@
         </div>
         <div class="col-auto">
             <button type="submit" class="btn btn-primary">Show month</button>
+        </div>
+    </form>
+</section>
+{% elif period == 'yearly' %}
+<section class="content-card mt-4">
+    <div class="section-heading">
+        <div>
+            <p class="eyebrow-text">Choose a year</p>
+            <h3>View a full year</h3>
+        </div>
+    </div>
+    <form method="get" class="row g-3 align-items-end">
+        <div class="col-auto">
+            <label for="year" class="form-label">Year</label>
+            <select name="year" id="year" class="form-select">
+                {% for y in year_options %}
+                    <option value="{{ y }}" {% if y == selected_year %}selected{% endif %}>{{ y }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary">Show year</button>
         </div>
     </form>
 </section>

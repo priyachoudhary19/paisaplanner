@@ -344,34 +344,67 @@ def expense_period_list(request, period):
         return HttpResponseForbidden("Invalid period.")
 
     period_label = period.capitalize()
-    selected_year = None
-    selected_month = None
+    current_date = timezone.localdate()
+    current_year = current_date.year
+    year_options = list(range(2020, current_year + 2))
+    month_options = [(i, calendar.month_name[i]) for i in range(1, 13)]
+    week_options = list(range(1, 54))
 
-    if period == "monthly" and request.GET.get("year") and request.GET.get("month"):
-        try:
-            selected_year = int(request.GET["year"])
-            selected_month = int(request.GET["month"])
-        except ValueError:
-            return HttpResponseForbidden("Invalid month selection.")
-        if selected_month < 1 or selected_month > 12:
-            return HttpResponseForbidden("Invalid month selection.")
-        try:
-            start = date(selected_year, selected_month, 1)
-        except ValueError:
-            return HttpResponseForbidden("Invalid month selection.")
-        last_day = calendar.monthrange(selected_year, selected_month)[1]
-        end = date(selected_year, selected_month, last_day)
-        period_label = start.strftime("%B %Y")
-    if selected_year is None:
-        selected_year = start.year
-    if selected_month is None:
-        selected_month = start.month
+    selected_year = start.year
+    selected_month = start.month
+    selected_week = start.isocalendar()[1]
+    selected_day = start
+
+    if period == "daily":
+        date_str = request.GET.get("date")
+        if date_str:
+            try:
+                selected_day = date.fromisoformat(date_str)
+                start = end = selected_day
+                period_label = selected_day.strftime("%d %B %Y")
+            except ValueError:
+                return HttpResponseForbidden("Invalid date selection.")
+    elif period == "weekly":
+        year_str = request.GET.get("year")
+        week_str = request.GET.get("week")
+        if year_str and week_str:
+            try:
+                selected_year = int(year_str)
+                selected_week = int(week_str)
+                start = date.fromisocalendar(selected_year, selected_week, 1)
+                end = start + timedelta(days=6)
+                period_label = f"Week {selected_week}, {selected_year}"
+            except ValueError:
+                return HttpResponseForbidden("Invalid week selection.")
+        else:
+            selected_year = start.isocalendar()[0]
+            selected_week = start.isocalendar()[1]
+    elif period == "monthly":
+        year_str = request.GET.get("year")
+        month_str = request.GET.get("month")
+        if year_str and month_str:
+            try:
+                selected_year = int(year_str)
+                selected_month = int(month_str)
+                start = date(selected_year, selected_month, 1)
+                last_day = calendar.monthrange(selected_year, selected_month)[1]
+                end = date(selected_year, selected_month, last_day)
+                period_label = start.strftime("%B %Y")
+            except ValueError:
+                return HttpResponseForbidden("Invalid month selection.")
+    elif period == "yearly":
+        year_str = request.GET.get("year")
+        if year_str:
+            try:
+                selected_year = int(year_str)
+                start = date(selected_year, 1, 1)
+                end = date(selected_year, 12, 31)
+                period_label = str(selected_year)
+            except ValueError:
+                return HttpResponseForbidden("Invalid year selection.")
 
     expenses = Expense.objects.filter(user=request.user, expense_date__range=(start, end))
     total = expenses.aggregate(total=Sum("amount"))["total"] or Decimal("0.00")
-    current_year = timezone.localdate().year
-    year_options = list(range(2020, current_year + 2))
-    month_options = [(i, calendar.month_name[i]) for i in range(1, 13)]
     return render(
         request,
         "expense/expense_period_list.html",
@@ -384,8 +417,11 @@ def expense_period_list(request, period):
             "end": end,
             "year_options": year_options,
             "month_options": month_options,
+            "week_options": week_options,
             "selected_year": selected_year,
             "selected_month": selected_month,
+            "selected_week": selected_week,
+            "selected_day": selected_day,
         },
     )
 
