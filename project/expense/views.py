@@ -337,18 +337,34 @@ def expense_create(request):
     return render(request, "expense/form.html", {"form": form, "title": "Add Expense"})
 
 
-def _month_weeks(year, month):
-    """Return list of (week_num, start_date, end_date) for 4 weeks in a month."""
+def _month_weeks(year, month, week_start=0):
+    """
+    Return list of (week_num, start_date, end_date) for the month.
+    week_start: 0=Monday, 6=Sunday
+    """
+    from calendar import monthrange
     first_day = date(year, month, 1)
-    last_day = date(year, month, calendar.monthrange(year, month)[1])
+    last_day = date(year, month, monthrange(year, month)[1])
     weeks = []
     week_num = 1
     current = first_day
-    while current <= last_day and week_num <= 4:
+    # Find the end of the first week
+    first_weekday = current.weekday()  # 0=Monday
+    if first_weekday != week_start:
+        # End of first week is the first week_start+6 or last day
+        days_to_end = (7 - (first_weekday - week_start)) % 7
+        week_end = min(current + timedelta(days=days_to_end), last_day)
+    else:
+        week_end = min(current + timedelta(days=6), last_day)
+    weeks.append((week_num, current, week_end))
+    week_num += 1
+    current = week_end + timedelta(days=1)
+    # Full weeks
+    while current <= last_day:
         week_end = min(current + timedelta(days=6), last_day)
         weeks.append((week_num, current, week_end))
-        current = week_end + timedelta(days=1)
         week_num += 1
+        current = week_end + timedelta(days=1)
     return weeks
 
 
@@ -395,7 +411,8 @@ def expense_period_list(request, period):
     current_year = current_date.year
     year_options = list(range(2020, current_year + 2))
     month_options = [(i, calendar.month_name[i]) for i in range(1, 13)]
-    week_options = list(range(1, 5))  # 4 weeks per month
+    # week_options will be dynamically set based on the number of weeks in the month
+    week_options = []
 
     selected_year = start.year
     selected_month = start.month
@@ -421,6 +438,7 @@ def expense_period_list(request, period):
                 selected_month = int(month_str)
                 selected_week = int(week_str)
                 weeks = _month_weeks(selected_year, selected_month)
+                week_options = list(range(1, len(weeks) + 1))
                 if 1 <= selected_week <= len(weeks):
                     start, end = weeks[selected_week - 1][1], weeks[selected_week - 1][2]
                     period_label = f"Week {selected_week} - {start.strftime('%d %b')} to {end.strftime('%d %b %Y')}"
@@ -431,6 +449,7 @@ def expense_period_list(request, period):
         else:
             selected_week = 1
             weeks = _month_weeks(selected_year, selected_month)
+            week_options = list(range(1, len(weeks) + 1))
             if weeks:
                 start, end = weeks[0][1], weeks[0][2]
                 period_label = f"Week 1 - {start.strftime('%d %b')} to {end.strftime('%d %b %Y')}"
@@ -463,6 +482,7 @@ def expense_period_list(request, period):
 
     # Generate month weeks and navigation for weekly view
     month_weeks = _month_weeks(selected_year, selected_month)
+    week_options = list(range(1, len(month_weeks) + 1))
     week_navigation = _get_week_navigation(selected_year, selected_month, selected_week)
 
     return render(
