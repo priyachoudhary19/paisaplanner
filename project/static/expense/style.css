@@ -570,6 +570,22 @@ textarea.form-control {
     color: #b42318;
 }
 
+.text-danger {
+    color: #b42318;
+}
+
+.text-success {
+    color: #15803d;
+}
+
+.row-danger td {
+    color: #b42318;
+}
+
+.row-success td {
+    color: #15803d;
+}
+
 .text-link {
     font-weight: 600;
 }

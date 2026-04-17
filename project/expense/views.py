@@ -513,9 +513,22 @@ def loan_payment_delete(request, pk):
 
 @login_required
 def credit_bill_list(request):
-    payments = CreditCardBillPayment.objects.filter(user=request.user)
-    total_paid = payments.aggregate(total=Sum("amount"))["total"] or Decimal("0.00")
-    return render(request, "expense/credit_bill_list.html", {"payments": payments, "total_paid": total_paid})
+    credit_expenses = Expense.objects.filter(user=request.user, payment_method=Expense.PAYMENT_CREDIT_CARD).order_by("-expense_date", "-created_at")
+    payments = CreditCardBillPayment.objects.filter(user=request.user).order_by("-paid_on", "-created_at")
+    credit_spent = credit_expenses.aggregate(total=Sum("amount"))["total"] or Decimal("0.00")
+    credit_paid = payments.aggregate(total=Sum("amount"))["total"] or Decimal("0.00")
+    credit_outstanding = max(Decimal("0.00"), credit_spent - credit_paid)
+    return render(
+        request,
+        "expense/credit_bill_list.html",
+        {
+            "credit_expenses": credit_expenses,
+            "payments": payments,
+            "credit_spent": credit_spent,
+            "credit_paid": credit_paid,
+            "credit_outstanding": credit_outstanding,
+        },
+    )
 
 
 @login_required
