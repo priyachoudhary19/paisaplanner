@@ -42,35 +42,6 @@
 <section class="content-card mt-4">
     <div class="section-heading">
         <div>
-            <p class="eyebrow-text">Choose a week</p>
-            <h3>View expenses by week within a month</h3>
-        </div>
-    </div>
-    <form method="get" class="row g-3 align-items-end">
-        <div class="col-auto">
-            <label for="year" class="form-label">Year</label>
-            <select id="year" name="year" class="form-select">
-                {% for y in year_options %}
-                    <option value="{{ y }}" {% if y == selected_year %}selected{% endif %}>{{ y }}</option>
-                {% endfor %}
-            </select>
-        </div>
-        <div class="col-auto">
-            <label for="month" class="form-label">Month</label>
-            <select id="month" name="month" class="form-select">
-                {% for m, name in month_options %}
-                    <option value="{{ m }}" {% if m == selected_month %}selected{% endif %}>{{ name }}</option>
-                {% endfor %}
-            </select>
-        </div>
-        <div class="col-auto">
-            <button type="submit" class="btn btn-primary">Go</button>
-        </div>
-    </form>
-</section>
-<section class="content-card mt-4">
-    <div class="section-heading">
-        <div>
             <p class="eyebrow-text">Select week</p>
             <h3>4 weeks of {{ month_options|get_item:selected_month }}</h3>
         </div>
