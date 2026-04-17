@@ -337,10 +337,12 @@ def expense_create(request):
     return render(request, "expense/form.html", {"form": form, "title": "Add Expense"})
 
 
-def _month_weeks(year, month, week_start=0):
+def _month_weeks(year, month):
     """
     Return list of (week_num, start_date, end_date) for the month.
-    week_start: 0=Monday, 6=Sunday
+    Week starts on 1st of month and ends on Sunday.
+    Subsequent weeks are full Monday-Sunday weeks.
+    Last week ends on last day of month.
     """
     from calendar import monthrange
     first_day = date(year, month, 1)
@@ -348,45 +350,50 @@ def _month_weeks(year, month, week_start=0):
     weeks = []
     week_num = 1
     current = first_day
-    # Find the end of the first week
-    first_weekday = current.weekday()  # 0=Monday
-    if first_weekday != week_start:
-        # End of first week is the first week_start+6 or last day
-        days_to_end = (7 - (first_weekday - week_start)) % 7
-        week_end = min(current + timedelta(days=days_to_end), last_day)
-    else:
-        week_end = min(current + timedelta(days=6), last_day)
+    
+    # First week: from 1st to the upcoming Sunday
+    first_weekday = current.weekday()  # 0=Monday, 6=Sunday
+    days_to_sunday = (6 - first_weekday) % 7  # Days until next Sunday
+    week_end = min(current + timedelta(days=days_to_sunday), last_day)
     weeks.append((week_num, current, week_end))
     week_num += 1
     current = week_end + timedelta(days=1)
-    # Full weeks
+    
+    # Full weeks: Monday to Sunday
     while current <= last_day:
         week_end = min(current + timedelta(days=6), last_day)
         weeks.append((week_num, current, week_end))
         week_num += 1
         current = week_end + timedelta(days=1)
+    
     return weeks
 
 
 def _get_week_navigation(year, month, selected_week):
-    """Generate previous and next week navigation URLs."""
+    """Generate previous and next week navigation URLs based on actual week count."""
+    weeks = _month_weeks(year, month)
+    total_weeks = len(weeks)
+    
     if selected_week > 1:
         prev_week = selected_week - 1
         prev_month = month
         prev_year = year
     else:
-        prev_week = 4
+        # Go to previous month, last week
         prev_month = month - 1
         prev_year = year
         if prev_month < 1:
             prev_month = 12
             prev_year = year - 1
+        prev_weeks = _month_weeks(prev_year, prev_month)
+        prev_week = len(prev_weeks)
 
-    if selected_week < 4:
+    if selected_week < total_weeks:
         next_week = selected_week + 1
         next_month = month
         next_year = year
     else:
+        # Go to next month, first week
         next_week = 1
         next_month = month + 1
         next_year = year
