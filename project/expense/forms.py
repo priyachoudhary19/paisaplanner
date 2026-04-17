@@ -60,8 +60,10 @@ class StyledModelForm(forms.ModelForm):
                 classes = f"{existing} form-select".strip()
             elif isinstance(field.widget, forms.Textarea):
                 classes = f"{existing} form-control min-h-[120px]".strip()
-            field.widget.attrs["class"] = classes            if name == "payment_method":
-                field.help_text = "Credit Card adds to card spending; Credit Card Bill Payment reduces your credit due."            if name == "notes":
+            field.widget.attrs["class"] = classes
+            if name == "payment_method":
+                field.help_text = "Credit Card adds to card spending; Credit Card Bill Payment reduces your credit due."
+            if name == "notes":
                 field.widget.attrs.setdefault("placeholder", "Optional notes")
 
 
