@@ -27,18 +27,23 @@
         </div>
     </div>
     <div class="row gx-2 gy-3">
-        <div class="col-auto">
-            <a class="btn btn-soft-rose" href="{% url 'expense_period_list' 'daily' %}">Daily</a>
-        </div>
-        <div class="col-auto">
-            <a class="btn btn-soft-rose" href="{% url 'expense_period_list' 'weekly' %}">Weekly</a>
-        </div>
-        <div class="col-auto">
-            <a class="btn btn-soft-rose" href="{% url 'expense_period_list' 'monthly' %}">Monthly</a>
-        </div>
-        <div class="col-auto">
-            <a class="btn btn-soft-rose" href="{% url 'expense_period_list' 'yearly' %}">Yearly</a>
-        </div>
+        {% if period == 'daily' %}
+            <div class="col-auto">
+                <a class="btn btn-soft-rose active">Daily</a>
+            </div>
+        {% elif period == 'weekly' %}
+            <div class="col-auto">
+                <a class="btn btn-soft-rose active">Weekly</a>
+            </div>
+        {% elif period == 'monthly' %}
+            <div class="col-auto">
+                <a class="btn btn-soft-rose active">Month</a>
+            </div>
+        {% elif period == 'yearly' %}
+            <div class="col-auto">
+                <a class="btn btn-soft-rose active">Yearly</a>
+            </div>
+        {% endif %}
     </div>
 </section>
 {% if period == 'daily' %}
