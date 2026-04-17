@@ -1,4 +1,5 @@
-from datetime import timedelta
+import calendar
+from datetime import date, timedelta
 from decimal import Decimal
 
 from django.contrib.auth import login
@@ -341,18 +342,50 @@ def expense_period_list(request, period):
     start, end = _period_bounds(period)
     if start is None:
         return HttpResponseForbidden("Invalid period.")
+
+    period_label = period.capitalize()
+    selected_year = None
+    selected_month = None
+
+    if period == "monthly" and request.GET.get("year") and request.GET.get("month"):
+        try:
+            selected_year = int(request.GET["year"])
+            selected_month = int(request.GET["month"])
+        except ValueError:
+            return HttpResponseForbidden("Invalid month selection.")
+        if selected_month < 1 or selected_month > 12:
+            return HttpResponseForbidden("Invalid month selection.")
+        try:
+            start = date(selected_year, selected_month, 1)
+        except ValueError:
+            return HttpResponseForbidden("Invalid month selection.")
+        last_day = calendar.monthrange(selected_year, selected_month)[1]
+        end = date(selected_year, selected_month, last_day)
+        period_label = start.strftime("%B %Y")
+    if selected_year is None:
+        selected_year = start.year
+    if selected_month is None:
+        selected_month = start.month
+
     expenses = Expense.objects.filter(user=request.user, expense_date__range=(start, end))
     total = expenses.aggregate(total=Sum("amount"))["total"] or Decimal("0.00")
+    current_year = timezone.localdate().year
+    year_options = list(range(2020, current_year + 2))
+    month_options = [(i, calendar.month_name[i]) for i in range(1, 13)]
     return render(
         request,
         "expense/expense_period_list.html",
         {
             "expenses": expenses,
             "period": period,
-            "period_label": period.capitalize(),
+            "period_label": period_label,
             "total": total,
             "start": start,
             "end": end,
+            "year_options": year_options,
+            "month_options": month_options,
+            "selected_year": selected_year,
+            "selected_month": selected_month,
         },
     )
 

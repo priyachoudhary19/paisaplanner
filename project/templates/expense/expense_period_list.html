@@ -19,6 +19,37 @@
         <p><a class="text-link" href="{% url 'expense_create_period' period %}">Create {{ period }} expense</a></p>
     </article>
 </section>
+{% if period == 'monthly' %}
+<section class="content-card mt-4">
+    <div class="section-heading">
+        <div>
+            <p class="eyebrow-text">Custom month view</p>
+            <h3>View any month</h3>
+        </div>
+    </div>
+    <form method="get" class="row g-3 align-items-end">
+        <div class="col-auto">
+            <label for="year" class="form-label">Year</label>
+            <select name="year" id="year" class="form-select">
+                {% for y in year_options %}
+                    <option value="{{ y }}" {% if y == selected_year %}selected{% endif %}>{{ y }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-auto">
+            <label for="month" class="form-label">Month</label>
+            <select name="month" id="month" class="form-select">
+                {% for m, name in month_options %}
+                    <option value="{{ m }}" {% if m == selected_month %}selected{% endif %}>{{ name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary">Show month</button>
+        </div>
+    </form>
+</section>
+{% endif %}
 
 <section class="content-card">
     <div class="section-heading">
