@@ -4,6 +4,6 @@ services:
     env: python
     branch: main
     rootDirectory: project
-    buildCommand: bash build.sh
+    buildCommand: pip install -r requirements.txt && python manage.py migrate && python manage.py collectstatic --noinput
     startCommand: gunicorn project.wsgi:application
-    pythonVersion: "3.13"
+    pythonVersion: "3.14"
