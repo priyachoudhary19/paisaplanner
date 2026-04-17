@@ -8,6 +8,7 @@ urlpatterns = [
     path("signup/", views.signup_view, name="signup"),
     path("login/", views.login_view, name="login"),
     path("logout/", LogoutView.as_view(), name="logout"),
+    path("expenses/add/", views.expense_create, name="expense_create"),
     path("expenses/<str:period>/", views.expense_period_list, name="expense_period_list"),
     path("expenses/add/<str:period>/", views.expense_create_period, name="expense_create_period"),
     path("expenses/<int:pk>/edit/", views.expense_update, name="expense_update"),

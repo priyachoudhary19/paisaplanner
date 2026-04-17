@@ -1,74 +1,156 @@
 {% extends 'expense/base.html' %}
 {% block title %}Dashboard | AAExpense{% endblock %}
+{% block page_heading %}Hi, {{ user.first_name|default:user.username }}{% endblock %}
 {% block content %}
-<section class="hero">
-    <div>
-        <h1>Expense Manager</h1>
-        <p>Simple tracking across daily, weekly, monthly, and yearly spending.</p>
-    </div>
-    <img src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=900&q=80" alt="Finance">
-</section>
+<section class="dashboard-grid">
+    <section class="hero-panel soft-pink-panel">
+        <div class="hero-panel__copy">
+            <span class="chip-label">Track all your expense</span>
+            <h2>Professional expense tracking with simple charts, credit monitoring, and loan management.</h2>
+            <p>The dashboard keeps your daily, weekly, monthly, and yearly expenses in one calm workspace.</p>
+        </div>
+        <div class="hero-panel__meta">
+            <div class="mini-stat-card">
+                <span>Total records</span>
+                <strong>{{ expense_count }}</strong>
+            </div>
+            <div class="mini-stat-card">
+                <span>Updated</span>
+                <strong>{{ dashboard_timestamp }}</strong>
+            </div>
+        </div>
+    </section>
 
-<section class="stats-grid">
-    <article><i class="fa-solid fa-calendar-day"></i><h3>Daily</h3><p>INR {{ total_daily }}</p></article>
-    <article><i class="fa-solid fa-calendar-week"></i><h3>Weekly</h3><p>INR {{ total_weekly }}</p></article>
-    <article><i class="fa-solid fa-calendar"></i><h3>Monthly</h3><p>INR {{ total_monthly }}</p></article>
-    <article><i class="fa-solid fa-chart-line"></i><h3>Yearly</h3><p>INR {{ total_yearly }}</p></article>
-</section>
+    <section class="summary-grid">
+        <article class="summary-card">
+            <span>Daily expense</span>
+            <strong>INR {{ total_daily }}</strong>
+            <p>Today’s spending snapshot.</p>
+        </article>
+        <article class="summary-card">
+            <span>Monthly expense</span>
+            <strong>INR {{ total_monthly }}</strong>
+            <p>{{ spent_ratio }}% of your current expected budget.</p>
+        </article>
+        <article class="summary-card">
+            <span>Credit card spent</span>
+            <strong>INR {{ credit_spent_total }}</strong>
+            <p>Total expense paid using credit card.</p>
+        </article>
+        <article class="summary-card">
+            <span>Credit outstanding</span>
+            <strong>INR {{ credit_outstanding }}</strong>
+            <p>This resets as bill payments cover your card usage.</p>
+        </article>
+    </section>
 
-<section class="stats-grid short">
-    <article><i class="fa-solid fa-money-bill-transfer"></i><h3>Loan Remaining</h3><p>INR {{ loan_remaining_total }}</p></article>
-    <article><i class="fa-solid fa-credit-card"></i><h3>Credit Outstanding</h3><p>INR {{ credit_outstanding }}</p></article>
-    <article><i class="fa-solid fa-wand-magic-sparkles"></i><h3>Forecast</h3><p>INR {{ predicted_next_month }} / month</p><small>Year estimate: INR {{ predicted_next_year }}</small></article>
-</section>
+    <section class="chart-stage">
+        <div class="section-heading">
+            <div>
+                <p class="eyebrow-text">Charts</p>
+                <h3>Expense graphs</h3>
+            </div>
+            <a class="btn btn-soft-rose" href="{% url 'reports' %}">Open detailed reports</a>
+        </div>
 
-<section class="quick-links">
-    <a href="{% url 'expense_period_list' 'daily' %}">View Daily</a>
-    <a href="{% url 'expense_period_list' 'weekly' %}">View Weekly</a>
-    <a href="{% url 'expense_period_list' 'monthly' %}">View Monthly</a>
-    <a href="{% url 'expense_period_list' 'yearly' %}">View Yearly</a>
-    <a href="{% url 'credit_bill_list' %}">Credit Bills</a>
-</section>
-
-<section class="charts-grid">
-    <article class="chart-card">
-        <h3>Monthly Trend</h3>
-        <div class="chart-list">
+        <div class="dashboard-chart">
             {% for item in monthly_chart_data %}
-                <div class="chart-row">
-                    <div class="chart-meta"><span>{{ item.label }}</span><strong>INR {{ item.total }}</strong></div>
-                    <div class="bar-track"><div class="bar-fill teal" style="width: {{ item.width }}%;"></div></div>
+                <div class="dashboard-chart__bar">
+                    <span class="dashboard-chart__value">INR {{ item.total }}</span>
+                    <div class="dashboard-chart__track">
+                        <div class="dashboard-chart__fill" style="height: {{ item.width }}%;"></div>
+                    </div>
+                    <span class="dashboard-chart__label">{{ item.label|slice:":3" }}</span>
                 </div>
             {% empty %}
-                <p>No data yet.</p>
+                <div class="empty-chart-state">
+                    <h4>No expense data yet</h4>
+                    <p>Add your first daily expense to start seeing charts here.</p>
+                    <a class="btn btn-rose-primary" href="{% url 'expense_create' %}">Add Expense</a>
+                </div>
             {% endfor %}
         </div>
-    </article>
-    <article class="chart-card">
-        <h3>Payment Mix</h3>
-        <div class="chart-list">
-            {% for item in payment_chart_data %}
-                <div class="chart-row">
-                    <div class="chart-meta"><span>{{ item.label }}</span><strong>{{ item.share }}%</strong></div>
-                    <div class="bar-track"><div class="bar-fill blue" style="width: {{ item.width }}%;"></div></div>
+    </section>
+
+    <section class="split-grid">
+        <article class="content-card">
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow-text">Recent</p>
+                    <h3>Latest expenses</h3>
+                </div>
+                <a class="text-link" href="{% url 'expense_period_list' 'monthly' %}">View monthly list</a>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table align-middle app-table mb-0">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Category</th>
+                            <th>Date</th>
+                            <th>Payment</th>
+                            <th>Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for expense in recent_expenses %}
+                            <tr>
+                                <td>{{ expense.title }}</td>
+                                <td>{{ expense.get_category_display }}</td>
+                                <td>{{ expense.expense_date|date:"d M Y" }}</td>
+                                <td>{{ expense.get_payment_method_display }}</td>
+                                <td>INR {{ expense.amount }}</td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center py-4">No expenses added yet.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </article>
+
+        <article class="content-card side-stack">
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow-text">Finance tools</p>
+                    <h3>Loans and cards</h3>
+                </div>
+            </div>
+
+            <div class="info-pill">
+                <span>Loan taken balance</span>
+                <strong>INR {{ loan_taken_total }}</strong>
+            </div>
+            <div class="info-pill">
+                <span>Loan given balance</span>
+                <strong>INR {{ loan_given_total }}</strong>
+            </div>
+            <div class="info-pill">
+                <span>Budget remaining</span>
+                <strong>INR {{ goal_remaining }}</strong>
+            </div>
+
+            {% for loan in upcoming_loans %}
+                <div class="timeline-row">
+                    <strong>{{ loan.counterparty }}</strong>
+                    <span>{{ loan.get_loan_type_display }} | EMI due {{ loan.next_emi_due_date|date:"d M Y" }}</span>
+                    <em>INR {{ loan.emi_amount }}</em>
                 </div>
             {% empty %}
-                <p>No data yet.</p>
+                {% for bill in recent_bills %}
+                    <div class="timeline-row">
+                        <strong>Credit bill payment</strong>
+                        <span>Paid on {{ bill.paid_on|date:"d M Y" }}</span>
+                        <em>INR {{ bill.amount }}</em>
+                    </div>
+                {% empty %}
+                    <p class="empty-copy mb-0">No loan or credit updates available yet.</p>
+                {% endfor %}
             {% endfor %}
-        </div>
-    </article>
-    <article class="chart-card">
-        <h3>Top Categories</h3>
-        <div class="chart-list">
-            {% for item in category_chart_data %}
-                <div class="chart-row">
-                    <div class="chart-meta"><span>{{ item.label }}</span><strong>INR {{ item.total }}</strong></div>
-                    <div class="bar-track"><div class="bar-fill violet" style="width: {{ item.width }}%;"></div></div>
-                </div>
-            {% empty %}
-                <p>No data yet.</p>
-            {% endfor %}
-        </div>
-    </article>
+        </article>
+    </section>
 </section>
 {% endblock %}

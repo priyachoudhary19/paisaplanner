@@ -1,21 +1,69 @@
 {% extends 'expense/base.html' %}
 {% block title %}Loans | AAExpense{% endblock %}
+{% block page_heading %}Loan Management{% endblock %}
 {% block content %}
-<section class="panel-headline">
-    <h1>Loans</h1>
-    <a class="btn" href="{% url 'loan_create' %}">Add Loan</a>
+<section class="summary-grid summary-grid--compact">
+    <article class="summary-card">
+        <span>Borrowing and lending</span>
+        <strong>Loan taken / Loan given</strong>
+        <p>Track both the money you borrowed and the money you lent.</p>
+    </article>
+    <article class="summary-card">
+        <span>EMI support</span>
+        <strong>Automatic payment progress</strong>
+        <p>Record each loan payment and keep remaining balances updated.</p>
+    </article>
+    <article class="summary-card">
+        <span>Quick action</span>
+        <strong>Create loan</strong>
+        <p><a class="text-link" href="{% url 'loan_create' %}">Add new loan record</a></p>
+    </article>
 </section>
-<section class="table-wrap">
-    <table>
-        <thead><tr><th>Name</th><th>Type</th><th>Principal</th><th>Interest</th><th>EMI</th><th>Remaining</th><th>Actions</th></tr></thead>
-        <tbody>
-            {% for loan in loans %}
-            <tr>
-                <td>{{ loan.counterparty }}</td><td>{{ loan.get_loan_type_display }}</td><td>{{ loan.principal_amount }}</td><td>{{ loan.annual_interest_rate }}%</td><td>{{ loan.emi_amount }}</td><td>{{ loan.remaining_amount }}</td>
-                <td><a href="{% url 'loan_detail' loan.pk %}">View</a> <a href="{% url 'loan_update' loan.pk %}">Edit</a> <a href="{% url 'loan_delete' loan.pk %}">Delete</a></td>
-            </tr>
-            {% empty %}<tr><td colspan="7">No loans.</td></tr>{% endfor %}
-        </tbody>
-    </table>
+
+<section class="content-card">
+    <div class="section-heading">
+        <div>
+            <p class="eyebrow-text">Loan records</p>
+            <h3>Borrowing and lending list</h3>
+        </div>
+        <a class="btn btn-soft-rose" href="{% url 'loan_create' %}">Add Loan</a>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table align-middle app-table mb-0">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Principal</th>
+                    <th>Interest</th>
+                    <th>EMI</th>
+                    <th>Remaining</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for loan in loans %}
+                    <tr>
+                        <td>{{ loan.counterparty }}</td>
+                        <td>{{ loan.get_loan_type_display }}</td>
+                        <td>INR {{ loan.principal_amount }}</td>
+                        <td>{{ loan.annual_interest_rate }}%</td>
+                        <td>INR {{ loan.emi_amount }}</td>
+                        <td>INR {{ loan.remaining_amount }}</td>
+                        <td class="table-actions">
+                            <a href="{% url 'loan_detail' loan.pk %}">View</a>
+                            <a href="{% url 'loan_update' loan.pk %}">Edit</a>
+                            <a href="{% url 'loan_delete' loan.pk %}">Delete</a>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center py-4">No loans added yet.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </section>
 {% endblock %}

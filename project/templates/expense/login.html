@@ -1,8 +1,43 @@
 {% extends 'expense/base.html' %}
 {% block title %}Login | AAExpense{% endblock %}
 {% block content %}
-<section class="form-card narrow">
-    <h1>Login</h1>
-    <form method="post" class="simple-form">{% csrf_token %}{{ form.as_p }}<button class="btn" type="submit">Login</button></form>
+<section class="auth-shell">
+    <div class="auth-copy-panel">
+        <span class="chip-label">AAExpense</span>
+        <h1>Login to your expense dashboard</h1>
+        <p>Track daily expenses, follow your credit card usage, and manage borrowed or lent money from one clean workspace.</p>
+        <ul class="auth-feature-list">
+            <li>Daily entry form with category dropdown and calendar date picker</li>
+            <li>Weekly, monthly, and yearly expense views</li>
+            <li>Loan taken and loan given tracking</li>
+            <li>Credit card spending and bill payment reset tracking</li>
+        </ul>
+    </div>
+
+    <div class="auth-form-card">
+        <div class="section-heading mb-4">
+            <div>
+                <p class="eyebrow-text">Welcome back</p>
+                <h3>Login</h3>
+            </div>
+        </div>
+        <form method="post" class="simple-form">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="form-field-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% for error in field.errors %}
+                        <small class="form-error">{{ error }}</small>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+            {% for error in form.non_field_errors %}
+                <small class="form-error d-block mb-3">{{ error }}</small>
+            {% endfor %}
+            <button class="btn btn-rose-primary w-100" type="submit">Login</button>
+        </form>
+        <p class="auth-switch-copy">New here? <a href="{% url 'signup' %}">Create an account</a></p>
+    </div>
 </section>
 {% endblock %}

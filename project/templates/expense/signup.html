@@ -1,8 +1,44 @@
 {% extends 'expense/base.html' %}
 {% block title %}Register | AAExpense{% endblock %}
 {% block content %}
-<section class="form-card narrow">
-    <h1>Register</h1>
-    <form method="post" class="simple-form">{% csrf_token %}{{ form.as_p }}<button class="btn" type="submit">Create Account</button></form>
+<section class="auth-shell">
+    <div class="auth-copy-panel">
+        <span class="chip-label">Simple registration</span>
+        <h1>Create your AAExpense account</h1>
+        <p>Register once, then log in to access a professional dashboard with expenses, loans, credit card tracking, and reports.</p>
+        <div class="auth-highlight-grid">
+            <div class="info-pill">
+                <span>Expense categories</span>
+                <strong>Food, Grocery, Bills, Rent, Health and more</strong>
+            </div>
+            <div class="info-pill">
+                <span>Views available</span>
+                <strong>Daily, weekly, monthly, yearly</strong>
+            </div>
+        </div>
+    </div>
+
+    <div class="auth-form-card">
+        <div class="section-heading mb-4">
+            <div>
+                <p class="eyebrow-text">Get started</p>
+                <h3>Register</h3>
+            </div>
+        </div>
+        <form method="post" class="simple-form">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="form-field-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% for error in field.errors %}
+                        <small class="form-error">{{ error }}</small>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+            <button class="btn btn-rose-primary w-100" type="submit">Create Account</button>
+        </form>
+        <p class="auth-switch-copy">Already have an account? <a href="{% url 'login' %}">Login</a></p>
+    </div>
 </section>
 {% endblock %}

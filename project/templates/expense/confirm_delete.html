@@ -1,9 +1,14 @@
 {% extends 'expense/base.html' %}
 {% block title %}Confirm Delete | AAExpense{% endblock %}
+{% block page_heading %}Confirm Delete{% endblock %}
 {% block content %}
-<section class="form-card narrow">
-    <h1>{{ title }}</h1>
-    <p>Delete this item?</p>
-    <form method="post">{% csrf_token %}<button class="btn danger" type="submit">Delete</button></form>
+<section class="content-card narrow-card text-center">
+    <p class="eyebrow-text">Danger zone</p>
+    <h3>{{ title }}</h3>
+    <p class="empty-copy">Delete this item permanently?</p>
+    <form method="post" class="d-flex justify-content-center">
+        {% csrf_token %}
+        <button class="btn btn-danger-soft" type="submit">Delete</button>
+    </form>
 </section>
 {% endblock %}

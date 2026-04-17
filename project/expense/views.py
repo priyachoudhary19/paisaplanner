@@ -3,14 +3,13 @@ from decimal import Decimal
 
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.forms import AuthenticationForm
 from django.db.models import Sum
 from django.db.models.functions import TruncMonth
 from django.http import HttpResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
-from .forms import CreditCardBillPaymentForm, ExpenseForm, LoanForm, LoanPaymentForm, SignUpForm
+from .forms import CreditCardBillPaymentForm, ExpenseForm, LoanForm, LoanPaymentForm, LoginForm, SignUpForm
 from .models import CreditCardBillPayment, Expense, Loan, LoanPayment
 
 
@@ -19,16 +18,15 @@ def signup_view(request):
         return redirect("dashboard")
     form = SignUpForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
-        user = form.save()
-        login(request, user)
-        return redirect("dashboard")
+        form.save()
+        return redirect("login")
     return render(request, "expense/signup.html", {"form": form})
 
 
 def login_view(request):
     if request.user.is_authenticated:
         return redirect("dashboard")
-    form = AuthenticationForm(request, data=request.POST or None)
+    form = LoginForm(request, data=request.POST or None)
     if request.method == "POST" and form.is_valid():
         login(request, form.get_user())
         return redirect("dashboard")
@@ -231,6 +229,8 @@ def _bar_data(data):
 def dashboard(request):
     expenses = Expense.objects.filter(user=request.user)
     loans = Loan.objects.filter(user=request.user)
+    recent_expenses = expenses[:5]
+    recent_bills = CreditCardBillPayment.objects.filter(user=request.user)[:5]
 
     daily_start, daily_end = _period_bounds("daily")
     weekly_start, weekly_end = _period_bounds("weekly")
@@ -246,10 +246,43 @@ def dashboard(request):
     credit_spent_total = expenses.filter(payment_method=Expense.PAYMENT_CREDIT_CARD).aggregate(total=Sum("amount"))["total"] or Decimal("0.00")
     credit_paid_total = CreditCardBillPayment.objects.filter(user=request.user).aggregate(total=Sum("amount"))["total"] or Decimal("0.00")
     credit_outstanding = max(Decimal("0.00"), credit_spent_total - credit_paid_total)
+    total_balance_view = expenses.aggregate(total=Sum("amount"))["total"] or Decimal("0.00")
     predicted_next_month, predicted_next_year = _build_prediction(expenses)
     monthly_chart_data = _bar_data(_chart_data(expenses))
     payment_chart_data = _bar_data(_payment_chart_data(expenses))
     category_chart_data = _bar_data(_category_chart_data(expenses))
+    active_loans = [loan for loan in loans if loan.remaining_amount > 0]
+    active_loans.sort(key=lambda loan: loan.next_emi_due_date or timezone.localdate())
+    upcoming_loans = [loan for loan in active_loans if loan.next_emi_due_date][:4]
+    loan_taken_total = sum(
+        (loan.remaining_amount for loan in loans if loan.loan_type == Loan.LOAN_TAKEN),
+        Decimal("0.00"),
+    )
+    loan_given_total = sum(
+        (loan.remaining_amount for loan in loans if loan.loan_type == Loan.LOAN_GIVEN),
+        Decimal("0.00"),
+    )
+    monthly_budget_target = predicted_next_month if predicted_next_month > 0 else total_monthly
+    spent_ratio = Decimal("0.00")
+    if monthly_budget_target > 0:
+        spent_ratio = min(Decimal("100.00"), (total_monthly / monthly_budget_target) * Decimal("100"))
+    spent_ratio = round(spent_ratio, 1)
+    spent_angle = round(float(spent_ratio) * 3.6, 1)
+    goal_remaining = max(Decimal("0.00"), monthly_budget_target - total_monthly)
+    period_labels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+    weekly_values = [Decimal("0.00")] * 7
+    for expense in expenses.filter(expense_date__range=(weekly_start, weekly_end)):
+        weekly_values[expense.expense_date.weekday()] += expense.amount
+    max_weekly_value = max(weekly_values) if any(weekly_values) else Decimal("1.00")
+    weekly_activity = []
+    for index, value in enumerate(weekly_values):
+        weekly_activity.append(
+            {
+                "label": period_labels[index],
+                "total": value.quantize(Decimal("0.01")),
+                "height": max(14, int((value / max_weekly_value) * 100)) if value else 14,
+            }
+        )
 
     return render(
         request,
@@ -259,15 +292,40 @@ def dashboard(request):
             "total_weekly": total_weekly,
             "total_monthly": total_monthly,
             "total_yearly": total_yearly,
+            "total_balance_view": total_balance_view,
             "loan_remaining_total": loan_remaining_total,
+            "loan_taken_total": loan_taken_total,
+            "loan_given_total": loan_given_total,
+            "expense_count": expenses.count(),
+            "credit_spent_total": credit_spent_total,
             "credit_outstanding": credit_outstanding,
             "predicted_next_month": predicted_next_month,
             "predicted_next_year": predicted_next_year,
             "monthly_chart_data": monthly_chart_data,
             "payment_chart_data": payment_chart_data,
             "category_chart_data": category_chart_data,
+            "recent_expenses": recent_expenses,
+            "recent_bills": recent_bills,
+            "upcoming_loans": upcoming_loans,
+            "monthly_budget_target": monthly_budget_target.quantize(Decimal("0.01")) if monthly_budget_target else Decimal("0.00"),
+            "goal_remaining": goal_remaining.quantize(Decimal("0.01")),
+            "spent_ratio": spent_ratio,
+            "spent_angle": spent_angle,
+            "weekly_activity": weekly_activity,
+            "dashboard_timestamp": timezone.localtime().strftime("%I:%M %p | %d %b %Y"),
         },
     )
+
+
+@login_required
+def expense_create(request):
+    form = ExpenseForm(request.POST or None, initial={"expense_date": timezone.localdate()})
+    if request.method == "POST" and form.is_valid():
+        expense = form.save(commit=False)
+        expense.user = request.user
+        expense.save()
+        return redirect("expense_period_list", period="monthly")
+    return render(request, "expense/form.html", {"form": form, "title": "Add Expense"})
 
 
 @login_required

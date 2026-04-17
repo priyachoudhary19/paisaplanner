@@ -1,12 +1,32 @@
 {% extends 'expense/base.html' %}
 {% block title %}{{ title }} | AAExpense{% endblock %}
+{% block page_heading %}{{ title }}{% endblock %}
 {% block content %}
-<section class="form-card">
-    <h1>{{ title }}</h1>
-    <form method="post" class="simple-form">
+<section class="content-card form-page-card">
+    <div class="section-heading">
+        <div>
+            <p class="eyebrow-text">Entry form</p>
+            <h3>{{ title }}</h3>
+        </div>
+    </div>
+
+    <form method="post" class="simple-form form-grid">
         {% csrf_token %}
-        {{ form.as_p }}
-        <button class="btn" type="submit">Save</button>
+        {% for field in form %}
+            <div class="form-field-group {% if field.name == 'notes' %}full-width{% endif %}">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.help_text %}
+                    <small class="form-help">{{ field.help_text }}</small>
+                {% endif %}
+                {% for error in field.errors %}
+                    <small class="form-error">{{ error }}</small>
+                {% endfor %}
+            </div>
+        {% endfor %}
+        <div class="full-width d-flex justify-content-end">
+            <button class="btn btn-rose-primary px-4" type="submit">Save</button>
+        </div>
     </form>
 </section>
 {% endblock %}
