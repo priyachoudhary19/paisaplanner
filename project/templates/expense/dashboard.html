@@ -53,23 +53,52 @@
             <a class="btn btn-soft-rose" href="{% url 'reports' %}">Open detailed reports</a>
         </div>
 
-        <div class="dashboard-chart">
-            {% for item in monthly_chart_data %}
-                <div class="dashboard-chart__bar">
-                    <span class="dashboard-chart__value">INR {{ item.total }}</span>
-                    <div class="dashboard-chart__track">
-                        <div class="dashboard-chart__fill" style="height: {{ item.width }}%;"></div>
-                    </div>
-                    <span class="dashboard-chart__label">{{ item.label|slice:":3" }}</span>
-                </div>
-            {% empty %}
-                <div class="empty-chart-state">
-                    <h4>No expense data yet</h4>
-                    <p>Add your first daily expense to start seeing charts here.</p>
-                    <a class="btn btn-rose-primary" href="{% url 'expense_create' %}">Add Expense</a>
-                </div>
-            {% endfor %}
+        <!-- Period Filter Form -->
+        <form id="chart-filter-form" method="get" class="chart-filter-form" style="margin-bottom: 1rem;">
+            <label for="period-select">Period:</label>
+            <select name="period" id="period-select" onchange="this.form.submit()">
+                <option value="daily" {% if period == 'daily' %}selected{% endif %}>Daily</option>
+                <option value="weekly" {% if period == 'weekly' %}selected{% endif %}>Weekly</option>
+                <option value="monthly" {% if period == 'monthly' %}selected{% endif %}>Monthly</option>
+                <option value="yearly" {% if period == 'yearly' %}selected{% endif %}>Yearly</option>
+            </select>
+        </form>
+
+        <!-- Chart.js Bar Chart -->
+        <div style="width: 100%; max-width: 700px; margin: 0 auto;">
+            <canvas id="expenseChart"></canvas>
         </div>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>
+        const chartLabels = [{% for item in monthly_chart_data %}'{{ item.label }}',{% endfor %}];
+        const chartData = [{% for item in monthly_chart_data %}{{ item.total }},{% endfor %}];
+        const ctx = document.getElementById('expenseChart').getContext('2d');
+        const expenseChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: chartLabels,
+                datasets: [{
+                    label: 'Expenses',
+                    data: chartData,
+                    backgroundColor: 'rgba(220, 20, 60, 0.5)',
+                    borderColor: 'rgba(220, 20, 60, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: true },
+                    tooltip: { enabled: true }
+                },
+                scales: {
+                    x: { title: { display: true, text: 'Period' } },
+                    y: { title: { display: true, text: 'Amount (INR)' }, beginAtZero: true }
+                }
+            }
+        });
+        </script>
+        <!-- End Chart.js Bar Chart -->
     </section>
 
     <section class="split-grid">
